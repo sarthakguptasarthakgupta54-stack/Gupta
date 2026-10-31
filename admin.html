@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Admin | SARTHAK GUPTA</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:#0a0a0a;color:#f5f1e8;font:16px/1.6 system-ui,-apple-system,sans-serif;padding:16px}
+.w{max-width:760px;margin:0 auto}h1,h2{color:#f0d58a;font-family:Georgia,serif;margin:.3em 0}h2{margin-top:28px}
+label{display:block;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#a9a395;margin:10px 0}
+input,textarea{width:100%;background:#0d0d0d;color:#f5f1e8;border:1px solid #333;border-radius:10px;padding:12px;font:inherit;margin-top:5px}
+input:focus,textarea:focus{outline:none;border-color:#c9a24b}
+button{background:linear-gradient(135deg,#f0d58a,#c9a24b);color:#0a0a0a;border:0;border-radius:999px;padding:12px 22px;font-weight:600;font-size:1rem;cursor:pointer;margin:6px 6px 6px 0}
+button.o{background:none;border:1px solid #c9a24b;color:#f0d58a}button.d{background:none;border:1px solid #a33;color:#e88}
+.c{border:1px solid #2c2c2c;border-radius:14px;padding:14px;margin:12px 0;display:grid;grid-template-columns:90px 1fr;gap:12px}
+.c img{width:90px;height:90px;object-fit:cover;border-radius:10px;background:#1b1b1b}
+@media(max-width:520px){.c{grid-template-columns:1fr}}
+#msg{position:sticky;bottom:8px;background:#111;border:1px solid #c9a24b;border-radius:12px;padding:10px 14px;margin-top:16px;color:#f0d58a}
+</style></head><body><div class="w">
+<div id="login"><h1>Admin Login</h1><label>Password<input id="pw" type="password" autocomplete="current-password"></label><button id="go">Login</button><div id="le" style="color:#e88"></div></div>
+<div id="app" hidden></div><div id="msg" hidden></div>
+<p><a href="/" style="color:#a9a395">← Back to website</a></p></div>
+<script>
+const D0={name:"SARTHAK GUPTA",tagline:"Quality Products. Trusted Service.",phone:"9826207556",email:"sarthakguptasarthakgupta54@gmail.com",photo:"",about:"I’m Sarthak Gupta, and I believe a good business is built on honest products and dependable service.\n\nEvery item I offer is chosen with care, and every customer is treated with respect. Get in touch any time — I’m always happy to help you find exactly what you need.",socials:[{label:"Instagram",url:""},{label:"Facebook",url:""},{label:"LinkedIn",url:""}],products:[]};
+const $=s=>document.querySelector(s),esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let pw=sessionStorage.getItem('pw')||'',S=null;
+const say=t=>{const m=$('#msg');m.hidden=!t;m.textContent=t||''};
+async function api(op,body,type){const r=await fetch('/api/admin?op='+op,{method:'POST',headers:{'x-admin-password':pw,'content-type':type||'application/json'},body});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Error '+r.status);return j}
+async function login(){pw=$('#pw').value||pw;try{await api('login','{}');sessionStorage.setItem('pw',pw);await start()}catch(e){$('#le').textContent=e.message}}
+async function start(){let d={};try{const r=await fetch('/api/content',{cache:'no-store'});if(r.ok)d=await r.json()}catch(e){}
+ S={...D0,...d};$('#login').hidden=true;$('#app').hidden=false;draw()}
+function draw(){const y=scrollY,f=(k,l,ta)=>`<label>${l}${ta?`<textarea data-k="${k}" rows="6">${esc(S[k])}</textarea>`:`<input data-k="${k}" value="${esc(S[k])}">`}</label>`;
+ $('#app').innerHTML=`<h1>Admin Panel</h1><button id="sv">Save</button>
+<h2>Profile</h2>${f('name','Website name')}${f('tagline','Tagline')}<div class="c"><img src="${esc(S.photo)}" alt="" onerror="this.style.visibility='hidden'"><label>Profile photo<input type="file" accept="image/*" data-up="photo"></label></div>
+<h2>Contact</h2>${f('phone','Phone')}${f('email','Email')}
+<h2>About</h2>${f('about','Introduction',1)}
+<h2>Social links</h2>${S.socials.map((s,i)=>`<label>Name<input data-s="${i}" data-sf="label" value="${esc(s.label)}"></label><label>Link (https://…)<input data-s="${i}" data-sf="url" value="${esc(s.url)}"></label>`).join('')}<button class="o" data-act="addsoc">+ Add social link</button>
+<h2>Products (${S.products.length})</h2>${S.products.map((p,i)=>`<div class="c"><img src="${esc(p.img)}" alt="" onerror="this.style.visibility='hidden'"><div><label>Photo<input type="file" accept="image/*" data-up="prod" data-i="${i}"></label><label>Name<input data-p="${i}" data-pf="name" value="${esc(p.name)}"></label><label>Description<textarea data-p="${i}" data-pf="desc" rows="3">${esc(p.desc)}</textarea></label><label>Price (optional)<input data-p="${i}" data-pf="price" value="${esc(p.price)}"></label><button class="d" data-act="del" data-i="${i}">Delete product</button></div></div>`).join('')}
+<button class="o" data-act="add">+ Add product</button><div><button id="sv2">Save</button></div>`;
+ $('#sv').onclick=$('#sv2').onclick=save;scrollTo(0,y)}
+async function save(){say('Saving…');try{await api('save',JSON.stringify(S));say('Saved ✔ Website updated.')}catch(e){say('Could not save: '+e.message)}}
+async function shrink(file){const im=await createImageBitmap(file),r=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);c.getContext('2d').drawImage(im,0,0,c.width,c.height);return new Promise(x=>c.toBlob(x,'image/jpeg',.86))}
+const A=$('#app');
+A.addEventListener('input',e=>{const t=e.target;if(t.dataset.k)S[t.dataset.k]=t.value;else if(t.dataset.s!=null)S.socials[+t.dataset.s][t.dataset.sf]=t.value;else if(t.dataset.p!=null)S.products[+t.dataset.p][t.dataset.pf]=t.value});
+A.addEventListener('change',async e=>{const t=e.target;if(!t.dataset.up||!t.files[0])return;say('Uploading image…');
+ try{const j=await api('upload',await shrink(t.files[0]),'image/jpeg');if(t.dataset.up=='photo')S.photo=j.url;else S.products[+t.dataset.i].img=j.url;draw();say('Image uploaded. Now press Save.')}catch(x){say('Upload failed: '+x.message)}});
+A.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
+ if(a=='add'){S.products.push({name:'New product',desc:'',price:'',img:''});draw()}
+ else if(a=='addsoc'){S.socials.push({label:'',url:''});draw()}
+ else if(a=='del'&&confirm('Delete this product?')){S.products.splice(+b.dataset.i,1);draw()}});
+$('#go').onclick=login;$('#pw').addEventListener('keydown',e=>{if(e.key=='Enter')login()});
+if(pw)login();
+</script></body></html>
